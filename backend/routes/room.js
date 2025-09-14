@@ -1,22 +1,26 @@
+// backend/routes/rooms.js
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
 import Room from "../models/Room.js";
 
 const router = express.Router();
 
-// Create a new room
+// Create a new room. Optionally require invite token.
+// POST body: { requireInviteToken: true|false, hostId: optional }
 router.post("/", async (req, res) => {
   try {
+    const { requireInviteToken = false, hostId = null } = req.body || {};
     const roomId = uuidv4();
-    const room = await Room.create({ roomId, participants: [] });
-    return res.status(201).json({ roomId });
+    const inviteToken = requireInviteToken ? uuidv4() : null;
+    const room = await Room.create({ roomId, hostId, requireInviteToken, inviteToken, participants: [] });
+    return res.status(201).json({ roomId, inviteToken });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to create room" });
   }
 });
 
-// Optional: get room info
+// Get room info (no sensitive fields like inviteToken unless caller is host)
 router.get("/:roomId", async (req, res) => {
   try {
     const { roomId } = req.params;
