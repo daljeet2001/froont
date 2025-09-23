@@ -1,10 +1,12 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import CreateRoom from "./pages/CreateRoom";
+// import CreateRoom from "./pages/CreateRoom";
 import Room from "./pages/Room";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Replay from "./pages/Replay";
 import LandingPage from "./pages/LandingPage";
+import QuestionsList from "./pages/QuestionsList";
+import QuestionDetail from "./pages/QuestionDetail";
 import { ProtectedRoute } from "./components/Protected";
 
 export default function App() {
@@ -17,7 +19,9 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
         {/* Home route */}
-        <Route path="/home" element={<CreateRoom />} />
+        {/* <Route path="/home" element={<CreateRoom />} /> */}
+        <Route path="/questions" element={<QuestionsList/>}/>
+        <Route path="/question/:slug" element={<QuestionDetail/>}/>
 
             {/* Dynamic room route */}
         <Route
@@ -60,6 +64,10 @@ function RoomWrapper() {
 
   return <Room roomId={roomId} role={role} />;
 }
+// function QuestionDetailWrapper(){
+//   const = { slug } = useParams();
+//   return <QuestionDetail slug={slug}/>;
+// }
 
 function ReplayWrapper() {
   const { roomId } = useParams();

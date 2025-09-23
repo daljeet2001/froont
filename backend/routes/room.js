@@ -9,10 +9,22 @@ const router = express.Router();
 // POST body: { requireInviteToken: true|false, hostId: optional }
 router.post("/", async (req, res) => {
   try {
-    const { requireInviteToken = false, hostId = null } = req.body || {};
-    const roomId = uuidv4();
-    const inviteToken = requireInviteToken ? uuidv4() : null;
-    const room = await Room.create({ roomId, hostId, requireInviteToken, inviteToken, participants: [] });
+// in POST "/" handler
+const { requireInviteToken = false, hostId = null, questionSlug = null } = req.body || {};
+const roomId = uuidv4();
+const inviteToken = requireInviteToken ? uuidv4() : null;
+
+
+// if (questionSlug) {
+//   const Question = await import("../models/Questions.js").then(m => m.default);
+//   const q = await Question.findOne({ slug: questionSlug }).lean();
+//   if (q) questionId = q._id.toString();
+// }
+
+const room = await Room.create({ roomId, hostId, requireInviteToken, inviteToken, participants: [], questionSlug });
+console.log(`Created room ${room}`)
+
+
     return res.status(201).json({ roomId, inviteToken });
   } catch (err) {
     console.error(err);

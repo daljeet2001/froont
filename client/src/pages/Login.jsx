@@ -18,7 +18,7 @@ export default function Login() {
       const data = await res.json();
       if (data.token) {
         saveToken(data.token);
-        window.location.href = "/home";
+        window.location.href = "/questions";
       } else {
         alert(data.error || "Login failed");
       }

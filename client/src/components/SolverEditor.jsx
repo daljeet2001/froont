@@ -1,7 +1,7 @@
 import React from "react";
 import Editor from "@monaco-editor/react";
 
-export default function SolverEditor({ roomId, token, inviteToken }) {
+export default function SolverEditor({ roomId, token, inviteToken,qId }) {
   const wsRef = React.useRef(null);
   const [code, setCode] = React.useState("// Start coding...\n");
   const [lastSaved, setLastSaved] = React.useState(null);
@@ -61,9 +61,10 @@ export default function SolverEditor({ roomId, token, inviteToken }) {
       const res = await fetch("http://localhost:4000/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code,qId }),
       });
       const data = await res.json();
+      console.log("Run result:", data);
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.send(
           JSON.stringify({ type: "run_output", roomId, payload: { result: data } })

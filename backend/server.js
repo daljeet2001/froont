@@ -6,13 +6,14 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import roomsRouter from "./routes/room.js";
+import questionsRouter from "./routes/questions.js";
 import authRouter from "./routes/auth.js";
 import replayRouter from "./routes/replay.js";
 import jwt from "jsonwebtoken";
 import SessionEvent from "./models/SessionEvent.js";
 import Room from "./models/Room.js";
 import { VM } from "vm2";
-
+import Questions from "./models/Questions.js"
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
@@ -23,32 +24,68 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomsRouter);
 app.use("/api/replay", replayRouter);
+app.use("/api/questions", questionsRouter);
+
+
 
 /**
  * Optional runner: WARNING: running user code is dangerous.
  * This runner uses vm2 with strict options; it's okay for simple JS snippets but NOT guaranteed sandbox on all environments.
  * For production use, run user code inside an isolated container (Docker) with strict resource limits.
  */
+
+
 app.post("/api/run", async (req, res) => {
   try {
-    const { code } = req.body;
-    if (typeof code !== "string") return res.status(400).json({ error: "Missing code" });
+    const { code, qId } = req.body;
+    // console.log("Code",code);
+    if (typeof code !== "string") {
+      return res.status(400).json({ error: "Missing code" });
+    }
 
-    // Very small VM with timeout and no require
+    const question = await Questions.findById(qId);
+    if (!question) return res.status(404).json({ error: "Question not found" });
+
+    const testCases = question.testCases;
+
     const vm = new VM({
-      timeout: 2000, // 2s
+      timeout: 2000,
       sandbox: {},
       eval: false,
       wasm: false
     });
 
-    let output;
-    try {
-      output = vm.run(`(function(){\n${code}\n})();`);
-      return res.json({ ok: true, result: output });
-    } catch (err) {
-      return res.json({ ok: false, error: String(err) });
+    // Extract function name from user code
+    const funcNameMatch = code.match(/function\s+([a-zA-Z0-9_]+)/);
+    if (!funcNameMatch) {
+      return res.json({ ok: false, error: "No function found in code" });
     }
+    const funcName = funcNameMatch[1];
+
+    // Load the student's code into the sandbox
+    vm.run(code);
+
+    // Run each test case
+    const results = testCases.map(tc => {
+      try {
+        const args = Array.isArray(tc.input) ? tc.input : [tc.input];
+        
+        // Evaluate function call in same VM context
+        const callCode = `${funcName}(${JSON.stringify(args)})`;
+        console.log("callcode",callCode)
+        const result = vm.run(callCode);
+        console.log("result",result);
+        const passed = JSON.stringify(result) === JSON.stringify(tc.expectedOutput);
+        console.log("passed",passed)
+
+        return { input: tc.input, expected: tc.expectedOutput, got: result,passed };
+      } catch (err) {
+        return { input: tc.input, expected: tc.expectedOutput, got: String(err), passed: false };
+      }
+    });
+
+    return res.json({ ok: true, results });
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Runner error" });
