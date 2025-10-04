@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Questions from "./models/Questions.js"
 dotenv.config();
-const extraQuestions = [
+
+const JavascriptQuestions = [
   {
     title: "Find Maximum in Array",
     slug: "find-maximum-in-array",
@@ -181,6 +182,222 @@ const extraQuestions = [
     ]
   }
 ];
+
+// const reactQuestions = [
+//   {
+//     title: "Build a Counter Component",
+//     slug: "counter-component",
+//     description: "Create a React component that displays a number and has + / - buttons to increase or decrease the count.",
+//     category: "react",
+//     difficulty: "easy",
+//     starterCode: `
+
+//  function App() {
+//   // your code here
+//   return (
+//     <div>
+//       <h2>Count: 0</h2>
+//       <button>+</button>
+//       <button>-</button>
+//     </div>
+//   );
+// }`,
+//     assets: { type: "image", url: "" },
+//     examples: [
+//       { input: "Click + twice", output: "Count: 2", explannation: "State updates on button clicks." },
+//       { input: "Click - once from 0", output: "Count: -1", explannation: "Count decreases correctly." }
+//     ],
+//     testCases: [
+//       { input: "click + three times", expectedOutput: "Count: 3" },
+//       { input: "click - once at start", expectedOutput: "Count: -1" }
+//     ]
+//   },
+//   {
+//     title: "Toggle Text Component",
+//     slug: "toggle-text",
+//     description: "Build a React component with a button that toggles between showing and hiding text.",
+//     category: "react",
+//     difficulty: "easy",
+//     starterCode: `
+
+//  function App() {
+//   // your code here
+//   return (
+//     <div>
+//       <button>Toggle</button>
+//       {/* conditionally render text */}
+//     </div>
+//   );
+// }`,
+//     assets: { type: "image", url: "" },
+//     examples: [
+//       { input: "Initial render", output: "Text hidden", explannation: "Text is not shown at start." },
+//       { input: "Click button once", output: "Hello World", explannation: "Text appears." }
+//     ],
+//     testCases: [
+//       { input: "click toggle once", expectedOutput: "Hello World" },
+//       { input: "click toggle twice", expectedOutput: "Text hidden" }
+//     ]
+//   },
+//   {
+//     title: "Form Input Handler",
+//     slug: "form-input-handler",
+//     description: "Create a React form with an input field that shows the entered value in real-time below the input.",
+//     category: "react",
+//     difficulty: "medium",
+//     starterCode: `
+
+//  function App() {
+//   // your code here
+//   return (
+//     <div>
+//       <input placeholder="Type something" />
+//       <p>Output: </p>
+//     </div>
+//   );
+// }`,
+//     assets: { type: "image", url: "" },
+//     examples: [
+//       { input: "Type 'React'", output: "Output: React", explannation: "Input value is displayed below." }
+//     ],
+//     testCases: [
+//       { input: "hello", expectedOutput: "Output: hello" },
+//       { input: "world", expectedOutput: "Output: world" }
+//     ]
+//   },
+//   {
+//     title: "Todo List Component",
+//     slug: "todo-list",
+//     description: "Build a simple Todo List where users can add tasks and see them displayed in a list.",
+//     category: "react",
+//     difficulty: "medium",
+//     starterCode: `
+
+//  function App() {
+//   // your code here
+//   return (
+//     <div>
+//       <input placeholder="Add todo" />
+//       <button>Add</button>
+//       <ul></ul>
+//     </div>
+//   );
+// }`,
+//     assets: { type: "image", url: "" },
+//     examples: [
+//       { input: "Add 'Learn React'", output: "<ul><li>Learn React</li></ul>", explannation: "Todo gets added to list." }
+//     ],
+//     testCases: [
+//       { input: "Add 'Task 1'", expectedOutput: ["Task 1"] },
+//       { input: "Add 'Task 1' and 'Task 2'", expectedOutput: ["Task 1", "Task 2"] }
+//     ]
+//   },
+//   {
+//     title: "Conditional Rendering",
+//     slug: "conditional-rendering",
+//     description: "Create a component that shows 'Logged In' if isLoggedIn is true, otherwise 'Please Log In'.",
+//     category: "react",
+//     difficulty: "easy",
+//     starterCode: `
+
+//  function App({ isLoggedIn }) {
+//   // your code here
+//   return (
+//     <div>
+//       {/* render text based on isLoggedIn */}
+//     </div>
+//   );
+// }`,
+//     assets: { type: "image", url: "" },
+//     examples: [
+//       { input: "isLoggedIn=true", output: "Logged In", explannation: "Shows correct status." },
+//       { input: "isLoggedIn=false", output: "Please Log In", explannation: "Default message." }
+//     ],
+//     testCases: [
+//       { input: { isLoggedIn: true }, expectedOutput: "Logged In" },
+//       { input: { isLoggedIn: false }, expectedOutput: "Please Log In" }
+//     ]
+//   }
+// ];
+
+
+// const htmlQuestions = [
+//   {
+//     title: "Basic HTML Page Structure",
+//     slug: "basic-html-structure",
+//     description: "Write the basic structure of an HTML5 page.",
+//     category: "HTML",
+//     difficulty: "easy",
+//     starterCode: `<!DOCTYPE html>
+// <html>
+//   <head>
+//     <title>My Page</title>
+//   </head>
+//   <body>
+//     <!-- your code here -->
+//   </body>
+// </html>`,
+//     examples: [
+//       { input: "Open in browser", output: "Empty page with title 'My Page'", explannation: "Shows correct structure" }
+//     ],
+//     testCases: [
+//       { input: "doctype", expectedOutput: true },
+//       { input: "html/head/body tags", expectedOutput: true }
+//     ]
+//   },
+//   {
+//     title: "Create a Link",
+//     slug: "create-a-link",
+//     description: "Write HTML to create a hyperlink to https://google.com with text 'Google'.",
+//     category: "HTML",
+//     difficulty: "easy",
+//     starterCode: `<a href="">Link</a>`,
+//     examples: [
+//       { input: "Click link", output: "Opens Google.com", explannation: "Correct href used." }
+//     ],
+//     testCases: [
+//       { input: "<a>", expectedOutput: true }
+//     ]
+//   }
+// ];
+
+// const cssQuestions = [
+//   {
+//     title: "Change Text Color",
+//     slug: "change-text-color",
+//     description: "Write CSS to make all paragraph text red.",
+//     category: "CSS",
+//     difficulty: "easy",
+//     starterCode: `.test {
+//   /* your code here */
+// }`,
+//     examples: [
+//       { input: "<p>Hello</p>", output: "Red text", explannation: "Paragraph styled correctly." }
+//     ],
+//     testCases: [
+//       { input: "p { color: red; }", expectedOutput: true }
+//     ]
+//   },
+//   {
+//     title: "Center a Div",
+//     slug: "center-a-div",
+//     description: "Center a div horizontally and vertically using Flexbox.",
+//     category: "CSS",
+//     difficulty: "medium",
+//     starterCode: `.test {
+//   display: flex;
+//   /* your code here */
+// }`,
+//     examples: [
+//       { input: "<div class='container'><div class='box'></div></div>", output: "Box centered", explannation: "Uses flexbox centering." }
+//     ],
+//     testCases: [
+//       { input: "justify-content: center;", expectedOutput: true },
+//       { input: "align-items: center;", expectedOutput: true }
+//     ]
+//   }
+// ];
+
 const MONGODB_URI=process.env.MONGODB_URI
 async function seedDB() 
 { try 
@@ -188,8 +405,8 @@ async function seedDB()
     await mongoose.connect(MONGODB_URI, 
       { useNewUrlParser: true, useUnifiedTopology: true });
        console.log("✅ MongoDB connected"); 
-       await Questions.deleteMany({}); console.log("🗑 Cleared old questions"); 
-       await Questions.insertMany(extraQuestions); 
+      //  await Questions.deleteMany({}); console.log("🗑 Cleared old questions"); 
+       await Questions.insertMany(JavascriptQuestions); 
        console.log("🌱 Seed data inserted"); process.exit(); 
       } 
        catch (err) { s

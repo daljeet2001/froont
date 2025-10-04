@@ -72,7 +72,6 @@ app.post("/api/run", async (req, res) => {
         
         // Evaluate function call in same VM context
         const callCode = `${funcName}(${JSON.stringify(args)})`;
-        console.log("callcode",callCode)
         const result = vm.run(callCode);
         console.log("result",result);
         const passed = JSON.stringify(result) === JSON.stringify(tc.expectedOutput);
@@ -166,6 +165,18 @@ wss.on("connection", (ws, req) => {
           }
           break;
         }
+
+        case "cheating": {
+          // broadcast to others
+          const set = wsRooms.get(ws.roomId) || new Set();
+          for (const client of set) {
+            if (client !== ws && client.readyState === client.OPEN) {
+              client.send(JSON.stringify({ type: "cheating", payload }));
+            }
+          }
+          break;
+        }
+
 
         case "run_code": {
           // persist run request
