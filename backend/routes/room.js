@@ -22,7 +22,7 @@ const inviteToken = requireInviteToken ? uuidv4() : null;
 // }
 
 const room = await Room.create({ roomId, hostId, requireInviteToken, inviteToken, participants: [], questionSlug });
-console.log(`Created room ${room}`)
+// console.log(`Created room ${room}`)
 
 
     return res.status(201).json({ roomId, inviteToken });

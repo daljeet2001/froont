@@ -1,7 +1,7 @@
 // backend/server.js
 import express from "express";
 import http from "http";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -94,6 +94,11 @@ app.post("/api/run", async (req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+
+let senderSocket = null;
+let recieverSocket = null;
+
+
 // In-memory mapping roomId -> Set of sockets
 const wsRooms = new Map();
 
@@ -106,7 +111,9 @@ wss.on("connection", (ws, req) => {
   ws.on("message", async (raw) => {
     try {
       const data = JSON.parse(raw.toString());
-      const { type, roomId, payload, token, inviteToken } = data;
+      // console.log(`data on ws server ${data}`);
+      const { type, roomId="null", payload="null", token="null", inviteToken="null" } = data;
+      console.log(`type ${type} and payload ${payload}`);
 
       // Handle join_room: validate token or inviteToken if room requires it
       if (type === "join_room") {
@@ -150,10 +157,50 @@ wss.on("connection", (ws, req) => {
       }
 
       // All other messages expect ws.roomId to be set
-      if (!ws.roomId) return ws.send(JSON.stringify({ type: "error", message: "Not joined to a room" }));
+      // if (!ws.roomId) return ws.send(JSON.stringify({ type: "error", message: "Not joined to a room" }));
 
       switch (type) {
+
+        //webrtc part
+
+        case "sender" : {
+          senderSocket = ws;
+          console.log("sender set");
+          // console.log(`sender socket ${senderSocket}`);
+
+        }
+
+        case "reciever" : {
+          recieverSocket = ws;
+          console.log("reciever set");
+          // console.log(`reciever socket ${recieverSocket}`);
+        }
+
+        case "createOffer" : {
+          if(ws!= senderSocket) return;
+          recieverSocket.send(JSON.stringify({type:"createOffer", payload:payload}))
+        }
+
+        case "createAnswer" : {
+          if(ws!=recieverSocket)return;
+          senderSocket.send(JSON.stringify({type : "createAnswer", payload: payload}))
+        }
+
+        case "iceCandidate" : {
+          if(ws === recieverSocket){
+            senderSocket.send(JSON.stringify({type:"iceCandidate", payload:payload}))
+          }
+          else if (ws === senderSocket){
+            recieverSocket.send(JSON.stringify({type:"iceCandidate", payload:payload}))
+          }
+        }
+
+
+
+
+
         case "code_change": {
+            if (!ws.roomId) return ws.send(JSON.stringify({ type: "error", message: "Not joined to a room" }));
           // persist event
           await SessionEvent.create({ roomId: ws.roomId, type: "code_change", payload });
           // broadcast to others
@@ -168,6 +215,7 @@ wss.on("connection", (ws, req) => {
 
         case "cheating": {
           // broadcast to others
+              if (!ws.roomId) return ws.send(JSON.stringify({ type: "error", message: "Not joined to a room" }));
           const set = wsRooms.get(ws.roomId) || new Set();
           for (const client of set) {
             if (client !== ws && client.readyState === client.OPEN) {
@@ -180,6 +228,7 @@ wss.on("connection", (ws, req) => {
 
         case "run_code": {
           // persist run request
+              if (!ws.roomId) return ws.send(JSON.stringify({ type: "error", message: "Not joined to a room" }));
           await SessionEvent.create({ roomId: ws.roomId, type: "run_request", payload });
           // optionally run the code server-side (use /api/run instead)
           // broadcast run request to spectators
@@ -193,6 +242,7 @@ wss.on("connection", (ws, req) => {
         }
 
         case "run_output": {
+              if (!ws.roomId) return ws.send(JSON.stringify({ type: "error", message: "Not joined to a room" }));
           // run output can be pushed back by runner and broadcast (persist)
           await SessionEvent.create({ roomId: ws.roomId, type: "run_output", payload });
           const set2 = wsRooms.get(ws.roomId) || new Set();
@@ -206,6 +256,7 @@ wss.on("connection", (ws, req) => {
 
         case "cursor": {
           // optional: save cursor events for richer replay
+              if (!ws.roomId) return ws.send(JSON.stringify({ type: "error", message: "Not joined to a room" }));
           await SessionEvent.create({ roomId: ws.roomId, type: "cursor", payload });
           const cursSet = wsRooms.get(ws.roomId) || new Set();
           for (const client of cursSet) {

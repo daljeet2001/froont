@@ -8,6 +8,8 @@ export default function QuestionDetail() {
   const [creating, setCreating] = useState(false);
   const [roomInfo, setRoomInfo] = React.useState(null);
   const [requireInvite, setRequireInvite] = React.useState(true);
+  const [solverLink, setSolverLink] = React.useState(null);
+  const [spectatorLink, setSpectatorLink] = React.useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:4000/api/questions/${slug}`).then(r=>r.json()).then(setQ).catch(console.error);
@@ -35,7 +37,36 @@ export default function QuestionDetail() {
     }
   };
 
+  React.useEffect(()=>{
+    if(roomInfo){
+       const slink = roomInfo.inviteToken 
+                ? `${window.location.origin}/room/${roomInfo.roomId}?role=solver&invite=${roomInfo.inviteToken}`
+                : `${window.location.origin}/room/${roomInfo.roomId}?role=solver`
+      setSolverLink(slink);
+
+
+      const ilink = `${window.location.origin}/room/${roomInfo.roomId}`
+      setSpectatorLink(ilink);
+    }
+
+
+  },[roomInfo])
+
   if (!q) return <div>Loading...</div>;
+
+
+  const handleCopy = async(link)=>{
+    try{
+      console.log(`link in handleCopy ${link}`)
+      await navigator.clipboard.writeText(link);
+      alert("Link copied to the clipboard")
+
+    }catch(e){
+     console.log(`failed to copy the link,${err}`);
+     alert("failed to copy the link")
+    }
+
+  }
   return (
     <>
     <div style={{ padding: 20 }}>
@@ -78,20 +109,30 @@ export default function QuestionDetail() {
       {roomInfo && (
         <div className="mt-6 p-4 bg-gray-50 rounded-md space-y-2">
           <p><span className="font-semibold">Room ID:</span> {roomInfo.roomId}</p>
-          <p>
+          {/* <p>
             <span className="font-semibold">Spectator link:</span>{" "}
             <a href={`${window.location.origin}/room/${roomInfo.roomId}`} className="text-blue-600 hover:underline">
               {window.location.origin}/room/{roomInfo.roomId}
             </a>
-          </p>
+          </p> */}
           <p>
-            <span className="font-semibold">Solver link:</span>{" "}
-            <code className="bg-gray-200 px-1 py-0.5 rounded">
-              {roomInfo.inviteToken 
+            {/* <span className="font-semibold">Solver link:</span>{" "} */}
+            
+            {/* <code className="bg-gray-200 px-1 py-0.5 rounded">
+             {roomInfo.inviteToken 
                 ? `${window.location.origin}/room/${roomInfo.roomId}?role=solver&invite=${roomInfo.inviteToken}`
                 : `${window.location.origin}/room/${roomInfo.roomId}?role=solver`
               }
-            </code>
+            </code> */}
+
+
+               { spectatorLink &&
+            <button  className="p-4 bg-blue-500 text-white cursor-pointer mr-4" onClick={()=>handleCopy(spectatorLink)}>copy spectator link</button>
+            }
+
+      { solverLink &&
+            <button  className="p-4 bg-blue-500 text-white cursor-pointer" onClick={()=>handleCopy(solverLink)}>copy solver link</button>
+            }
           </p>
         </div>
       )}
